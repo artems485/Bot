@@ -72,7 +72,7 @@ def back_to_main_menu(update: Update, context: CallbackContext):
 
 def exit_menu(update: Update, context: CallbackContext):
     kb = ReplyKeyboardMarkup([[KeyboardButton('Я вышел')], [KeyboardButton('Назад')]], resize_keyboard=True)
-    update.message.reply_text('Перейдите по ссылке и выйдите', reply_markup=kb)
+    update.message.reply_text('Перейдите по ссылке и выйдите https://bot-blue-alpha.vercel.app', reply_markup=kb)
     return State.EXIT
 
 
@@ -83,7 +83,7 @@ def i_exited(update: Update, context: CallbackContext):
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
         return State.SETTINGS
     kb = ReplyKeyboardMarkup([[KeyboardButton('Я вышел')], [KeyboardButton('Назад')]], resize_keyboard=True)
-    update.message.reply_text('Не получилось, попробуйте еще раз', reply_markup=kb)
+    update.message.reply_text('Не получилось, попробуйте еще раз https://bot-blue-alpha.vercel.app', reply_markup=kb)
     return State.EXIT
 
 
