@@ -126,7 +126,7 @@ def policy():
 
 
 @app.route('/terms')
-def policy():
+def terms():
     return render_template('terms.html')
 
 
