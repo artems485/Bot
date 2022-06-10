@@ -165,16 +165,20 @@ def callback():
         if resp.status_code == 200:
             user_data = resp.json()
             email = user_data['email']
-            user = User.query.filter_by(email=email).first()
-            if user is None:
-                user = User()
-                user.email = email
-            user.name = user_data['name']
-            print(token)
-            user.tokens = json.dumps(token)
-            db.session.add(user)
-            db.session.commit()
-            login_user(user)
+            try:
+                user = User.query.filter_by(email=email).first()
+
+                if user is None:
+                    user = User()
+                    user.email = email
+                user.name = user_data['name']
+                print(token)
+                user.tokens = json.dumps(token)
+                db.session.add(user)
+                db.session.commit()
+                login_user(user)
+            except Exception as e:
+                logger.error(e)
             return redirect(url_for('index'))
         return 'Could not fetch your information.'
 
