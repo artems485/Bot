@@ -1,6 +1,6 @@
 import logging
 from enum import IntEnum
-
+from flask import Flask, Response
 from simplegmail import Gmail
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -73,5 +73,15 @@ conversation = ConversationHandler(name='main',
                                            State.UPDATE_TOKEN: [MessageHandler(Filters.text('Назад'), settings)]},
                                    fallbacks=[CommandHandler(command='start', callback=start)])
 dispatcher.add_handler(conversation)
+
+app = Flask(__name__)
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return Response("<h1>Flask</h1><p>You visited: /%s</p>" % (path), mimetype="text/html")
+
+
 updater.start_polling()
 updater.idle()
