@@ -53,7 +53,7 @@ class DevConfig(Config):
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
             'ssl_mode': 'VERIFY_IDENTITY',
-            'ssl': {"ca": "/etc/ssl/cert.pem"}
+            'ssl': {'ca': os.getenv('PLANETSCALE_SSL_CERT_PATH')}
         }
     }
 
