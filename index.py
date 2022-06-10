@@ -90,12 +90,6 @@ class User(db.Model, UserMixin):
     tokens = db.Column(db.Text)
 
 
-try:
-    db.create_all()
-except Exception as e:
-    logger.error(e)
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
