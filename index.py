@@ -89,8 +89,8 @@ def callback():
                 user = User()
                 user.telegram_id = telegram_id
                 user.email = email
+            user.authenticated = True
             user.name = user_data['name']
-            print(token)
             user.tokens = json.dumps(token)
             db.session.add(user)
             db.session.commit()
@@ -102,6 +102,10 @@ def callback():
 @app.route('/logout')
 @login_required
 def logout():
+    user = current_user
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
     logout_user()
     return redirect(url_for('index'))
 

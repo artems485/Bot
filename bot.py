@@ -32,7 +32,7 @@ def start(update: Update, context: CallbackContext):
 def settings(update: Update, context: CallbackContext):
     context.chat_data['authorization'] = False
     user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
-    if not user or not user.is_authenticated:
+    if not user or not user.authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
     else:
@@ -54,7 +54,7 @@ def update_email(update: Update, context: CallbackContext):
 
 def i_authorized(update: Update, context: CallbackContext):
     user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
-    if not user or not user.is_authenticated:
+    if not user or not user.authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Я авторизировался')], [KeyboardButton('Назад')]],
                                  resize_keyboard=True)
         update.message.reply_text(
@@ -78,7 +78,7 @@ def exit_menu(update: Update, context: CallbackContext):
 
 def i_exited(update: Update, context: CallbackContext):
     user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
-    if not user or not user.is_authenticated:
+    if not user or not user.authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
         return State.SETTINGS
