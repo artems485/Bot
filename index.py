@@ -1,5 +1,5 @@
 import telegram
-from flask import Flask, request
+from flask import Flask, request, Response
 
 from bot import *
 
@@ -21,3 +21,4 @@ def base():
 def bot_webhook():
     update = telegram.update.Update.de_json(request.get_json(force=True), bot=dispatcher.bot)
     dispatcher.process_update(update)
+    return Response('Ok', status=200)
