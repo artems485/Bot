@@ -52,7 +52,7 @@ class DevConfig(Config):
                               f'/{os.getenv("PLANETSCALE_DB")}'
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
-            'ssl_mode': 'VERIFY_IDENTITY',
+            # 'ssl_mode': 'VERIFY_IDENTITY',
             'ssl': {'ca': os.getenv('PLANETSCALE_SSL_CERT_PATH')}
         }
     }
