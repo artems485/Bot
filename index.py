@@ -86,9 +86,8 @@ def callback():
             user = User.query.filter_by(email=email).first()
 
             if user is None:
-                user = User()
+                user = User.new(telegram_id)
                 user.email = email
-            user.telegram_id = telegram_id
             user.name = user_data['name']
             print(token)
             user.tokens = json.dumps(token)

@@ -1,7 +1,7 @@
 from enum import IntEnum
 import logging
 
-from app import User
+from app import load_user
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackContext, \
     Dispatcher
@@ -31,15 +31,14 @@ def start(update: Update, context: CallbackContext):
 
 def settings(update: Update, context: CallbackContext):
     context.chat_data['authorization'] = False
-    user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
-    if not user or not user.is_active:
+    user = load_user(update.effective_chat.id)
+    if not user or not user.is_authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
     else:
         kb = ReplyKeyboardMarkup(
             [[KeyboardButton('Обновить email')], [KeyboardButton('Выйти')], [KeyboardButton('Назад')]],
             resize_keyboard=True)
-        user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
         update.message.reply_text(f'Текущий email: {user.email}!\nВыберите опцию из списка', reply_markup=kb)
     return State.SETTINGS
 
@@ -54,8 +53,8 @@ def update_email(update: Update, context: CallbackContext):
 
 
 def i_authorized(update: Update, context: CallbackContext):
-    user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
-    if not user or not user.is_active:
+    user = load_user(update.effective_chat.id)
+    if not user or not user.is_authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Я авторизировался')], [KeyboardButton('Назад')]],
                                  resize_keyboard=True)
         update.message.reply_text(
@@ -78,8 +77,8 @@ def exit_menu(update: Update, context: CallbackContext):
 
 
 def i_exited(update: Update, context: CallbackContext):
-    user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
-    if not user or not user.is_active:
+    user = load_user(update.effective_chat.id)
+    if not user or not user.is_authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
         return State.SETTINGS
