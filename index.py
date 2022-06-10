@@ -20,8 +20,8 @@ if webhook.url:
 
 dispatcher.bot.set_webhook(url='https://bot-blue-alpha.vercel.app/' + TOKEN)
 
-GOOGLE_CLIENT_ID = '655553482219-gag2tno6u7r7b4rgbjp43vas0qkfo39o.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET = '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'
+GOOGLE_CLIENT_ID = '655553482219-ho3edlipgsh8io3fjguui3ume3u2cose.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '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'
 
 
 class Auth:
@@ -111,6 +111,11 @@ def get_google_auth(state=None, token=None):
 @login_required
 def index():
     return render_template('index.html')
+
+
+@app.route('/policy')
+def policy():
+    return render_template('policy.html')
 
 
 @app.route('/login')
