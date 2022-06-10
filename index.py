@@ -20,8 +20,8 @@ if webhook.url:
 
 dispatcher.bot.set_webhook(url='https://bot-blue-alpha.vercel.app/' + TOKEN)
 
-GOOGLE_CLIENT_ID = '655553482219-ho3edlipgsh8io3fjguui3ume3u2cose.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET = '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'
+GOOGLE_CLIENT_ID = '762970632572-2ait8506rq0f06vqs4d0vuf57gd8n8le.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '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'
 
 
 class Auth:
