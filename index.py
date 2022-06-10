@@ -49,9 +49,13 @@ class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{os.getenv("PLANETSCALE_DB_USERNAME")}' \
                               f':{os.getenv("PLANETSCALE_DB_PASSWORD")}' \
                               f'@{os.getenv("PLANETSCALE_DB_HOST")}' \
-                              f'/{os.getenv("PLANETSCALE_DB")}' \
-                              f'?ssl_mode=VERIFY_IDENTITY' \
-                              f'&ssl_ca={os.getenv("PLANETSCALE_SSL_CERT_PATH")}'
+                              f'/{os.getenv("PLANETSCALE_DB")}'
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'connect_args': {
+            'ssl_mode': 'VERIFY_IDENTITY',
+            'ssl': {"ca": "/etc/ssl/cert.pem"}
+        }
+    }
 
 
 class ProdConfig(Config):
