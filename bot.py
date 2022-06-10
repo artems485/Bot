@@ -1,7 +1,7 @@
 from enum import IntEnum
 import logging
 
-from simplegmail import Gmail
+from app import User
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackContext, \
     Dispatcher
@@ -15,11 +15,11 @@ TOKEN = '5569549699:AAGRHqOgcprg2iqkkmlV1DzSUaUBbUCwdtM'
 updater = Updater(use_context=True, token=TOKEN)
 dispatcher: Dispatcher = updater.dispatcher
 
+
 class State(IntEnum):
     START = 0,
     SETTINGS = 1,
-    UPDATE_SECRET = 2,
-    UPDATE_TOKEN = 3
+    AUTHORIZATION = 2,
 
 
 def start(update: Update, context: CallbackContext):
@@ -29,30 +29,36 @@ def start(update: Update, context: CallbackContext):
 
 
 def settings(update: Update, context: CallbackContext):
+    context.chat_data['authorization'] = False
     kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
-    update.message.reply_text('Выберите опцию из списка', reply_markup=kb)
+    if 'authorized' not in context.chat_data or not context.chat_data['authorized']:
+        update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
+    else:
+        user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
+        update.message.reply_text(f'Текущий email: {user.email}!\nВыберите опцию из списка', reply_markup=kb)
     return State.SETTINGS
 
 
 def update_email(update: Update, context: CallbackContext):
-    kb = ReplyKeyboardMarkup([[KeyboardButton('Назад')]], resize_keyboard=True)
-    update.message.reply_text('Скиньте файл client_secret.json', reply_markup=kb)
-    return State.UPDATE_SECRET
+    kb = ReplyKeyboardMarkup([[KeyboardButton('Я авторизировался')], [KeyboardButton('Назад')]], resize_keyboard=True)
+    update.message.reply_text(
+        f'Авторизируйтесь: https://bot-blue-alpha.vercel.app/login?telegram_id={update.effective_chat.id}',
+        reply_markup=kb)
+    context.chat_data['authorization'] = True
+    return State.AUTHORIZATION
 
 
-def secret_file_name(chat_id):
-    return f'secrets/{chat_id}.json'
-
-
-def update_secret(update: Update, context: CallbackContext):
-    context.bot.get_file(update.message.document).download()
-    file_name = secret_file_name(update.effective_chat.id)
-    with open(file_name, 'wb') as f:
-        gmail = Gmail(file_name)
-        context.bot.get_file(update.message.document).download(out=f)
-        kb = ReplyKeyboardMarkup([[KeyboardButton('Назад')]], resize_keyboard=True)
-        update.message.reply_text('Скиньте файл gmail_token.json', reply_markup=kb)
-        return State.UPDATE_TOKEN
+def i_authorized(update: Update, context: CallbackContext):
+    user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
+    if user is None:
+        kb = ReplyKeyboardMarkup([[KeyboardButton('Я авторизировался')], [KeyboardButton('Назад')]],
+                                 resize_keyboard=True)
+        update.message.reply_text(
+            f'Попробуйте снова: https://bot-blue-alpha.vercel.app/login?telegram_id={update.effective_chat.id}',
+            reply_markup=kb)
+        return State.AUTHORIZATION
+    context.chat_data['authorized'] = True
+    return settings(update, context)
 
 
 def back_to_main_menu(update: Update, context: CallbackContext):
@@ -67,9 +73,9 @@ conversation = ConversationHandler(name='main',
                                            State.SETTINGS: [
                                                MessageHandler(Filters.text('Обновить email'), update_email),
                                                MessageHandler(Filters.text('Назад'), back_to_main_menu)],
-                                           State.UPDATE_SECRET: [
+                                           State.AUTHORIZATION: [
                                                MessageHandler(Filters.text('Назад'), settings),
-                                               MessageHandler(Filters.document, update_secret)],
-                                           State.UPDATE_TOKEN: [MessageHandler(Filters.text('Назад'), settings)]},
-                                   fallbacks=[CommandHandler(command='start', callback=start)])
+                                               MessageHandler(Filters.text('Я авторизировался'), i_authorized)
+                                           ]},
+                                   fallbacks=[CommandHandler(command='start', callback=start)], per_chat=True)
 dispatcher.add_handler(conversation)

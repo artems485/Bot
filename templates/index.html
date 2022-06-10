@@ -3,6 +3,7 @@
     <ul class="nav navbar-nav navbar-right">
         <li><strong>Почта</strong>: {{current_user.email}}</li>
         <li><strong>Имя</strong>: {{current_user.name}}</li>
+        <li><strong>Telegram ID</strong>: {{current_user.telegam_id}}</li>
         <li><a href="{{url_for('logout')}}">Выйти</a></li>
     </ul>
 </div><!-- /.navbar-collapse -->
