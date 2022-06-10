@@ -22,11 +22,11 @@ dispatcher.bot.set_webhook(url='https://bot-blue-alpha.vercel.app/' + TOKEN)
 
 
 @app.route('/')
-@login_required
 def index():
     return render_template('index.html')
 
 
+@login_required
 @app.route('/home')
 def home():
     return render_template('home.html')
@@ -46,17 +46,16 @@ def terms():
 def login():
     try:
         telegram_id = int(request.args.get('telegram_id', None))
-    except ValueError:
-        return redirect(url_for('index'))
-
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    google = get_google_auth()
-    auth_url, state = google.authorization_url(
-        Auth.AUTH_URI, access_type='offline')
-    session['oauth_state'] = state
-    session['telegram_id'] = telegram_id
-    return render_template('login.html', auth_url=auth_url)
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
+        google = get_google_auth()
+        auth_url, state = google.authorization_url(
+            Auth.AUTH_URI, access_type='offline')
+        session['oauth_state'] = state
+        session['telegram_id'] = telegram_id
+        return render_template('login.html', auth_url=auth_url)
+    except TypeError:
+        return render_template('index.html')
 
 
 @app.route('/authorized')
