@@ -113,6 +113,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+
 @app.route('/policy')
 def policy():
     return render_template('policy.html')
@@ -121,6 +126,7 @@ def policy():
 @app.route('/terms')
 def policy():
     return render_template('terms.html')
+
 
 @app.route('/login')
 def login():
