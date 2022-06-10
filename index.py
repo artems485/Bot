@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 TOKEN = '5569549699:AAGRHqOgcprg2iqkkmlV1DzSUaUBbUCwdtM'
 updater = Updater(use_context=True, token=TOKEN)
 dispatcher: Dispatcher = updater.dispatcher
-dispatcher.bot.set_webhook(webhook_url='https://bot-blue-alpha.vercel.app/' + TOKEN)
+dispatcher.bot.set_webhook(url='https://bot-blue-alpha.vercel.app/' + TOKEN)
 
 
 class State(IntEnum):
