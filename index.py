@@ -52,6 +52,7 @@ class DevConfig(Config):
                               f':{os.getenv("PLANETSCALE_DB_PASSWORD")}' \
                               f'@{os.getenv("PLANETSCALE_DB_HOST")}' \
                               f'/{os.getenv("PLANETSCALE_DB")}'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
             # 'ssl_mode': 'VERIFY_IDENTITY',
@@ -87,6 +88,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=True)
     tokens = db.Column(db.Text)
+
+
+db.create_all()
 
 
 @login_manager.user_loader
