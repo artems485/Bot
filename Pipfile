@@ -12,6 +12,7 @@ requests = "*"
 requests-oauthlib = "*"
 flask-sqlalchemy = "*"
 flask-login = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

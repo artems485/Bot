@@ -1,17 +1,19 @@
 import json
-import os
 
 import telegram
-from flask import Flask, request, Response, redirect, url_for, session, url_for, redirect, render_template
-from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
+from flask import Flask, request, Response, session, url_for, redirect, render_template
 from flask_login import LoginManager, login_required, login_user, \
     logout_user, current_user, UserMixin
-from requests_oauthlib import OAuth2Session
+from flask_sqlalchemy import SQLAlchemy
 from requests.exceptions import HTTPError
+from requests_oauthlib import OAuth2Session
+
+load_dotenv()
+import os
+import MySQLdb
 
 from bot import *
-
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 webhook = dispatcher.bot.get_webhook_info()
 if webhook.url:
@@ -45,13 +47,13 @@ class Config:
 class DevConfig(Config):
     """Dev config"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, "test.db")
+    SQLALCHEMY_DATABASE_URI = f'mysql:///{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
 
 
 class ProdConfig(Config):
     """Production config"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, "prod.db")
+    SQLALCHEMY_DATABASE_URI = f'mysql:///{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
 
 
 config = {
