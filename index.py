@@ -46,7 +46,7 @@ def terms():
 def login():
     try:
         telegram_id = int(request.form['telegram_id'])
-    except Exception:
+    except ValueError:
         return redirect(url_for('index'))
 
     if current_user.is_authenticated:
@@ -84,21 +84,18 @@ def callback():
         if resp.status_code == 200:
             user_data = resp.json()
             email = user_data['email']
-            try:
-                user = User.query.filter_by(email=email).first()
+            user = User.query.filter_by(email=email).first()
 
-                if user is None:
-                    user = User()
-                    user.email = email
-                user.telegram_id = telegram_id
-                user.name = user_data['name']
-                print(token)
-                user.tokens = json.dumps(token)
-                db.session.add(user)
-                db.session.commit()
-                login_user(user)
-            except Exception as e:
-                logger.error(e)
+            if user is None:
+                user = User()
+                user.email = email
+            user.telegram_id = telegram_id
+            user.name = user_data['name']
+            print(token)
+            user.tokens = json.dumps(token)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
             return redirect(url_for('index'))
         return 'Could not fetch your information.'
 
