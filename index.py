@@ -45,7 +45,7 @@ def terms():
 @app.route('/login')
 def login():
     try:
-        telegram_id = int(request.form['telegram_id'])
+        telegram_id = int(request.args.get('telegram_id', None))
     except ValueError:
         return redirect(url_for('index'))
 
