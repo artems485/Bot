@@ -43,13 +43,6 @@ class Config:
     SECRET_KEY = SECRET_KEY
 
 
-logger.error(f'mysql+pymysql://{os.getenv("PLANETSCALE_DB_USERNAME")}'
-             f':{os.getenv("PLANETSCALE_DB_PASSWORD")}'
-             f'@{os.getenv("PLANETSCALE_DB_HOST")}'
-             f'/{os.getenv("PLANETSCALE_DB")}'
-             f'?ssl_cert={os.getenv("PLANETSCALE_SSL_CERT_PATH")}')
-
-
 class DevConfig(Config):
     """Dev config"""
     DEBUG = True
@@ -57,7 +50,8 @@ class DevConfig(Config):
                               f':{os.getenv("PLANETSCALE_DB_PASSWORD")}' \
                               f'@{os.getenv("PLANETSCALE_DB_HOST")}' \
                               f'/{os.getenv("PLANETSCALE_DB")}' \
-                              f'?ssl_cert={os.getenv("PLANETSCALE_SSL_CERT_PATH")}'
+                              f'?ssl_mode=VERIFY_IDENTITY' \
+                              f'&ssl_ca={os.getenv("PLANETSCALE_SSL_CERT_PATH")}'
 
 
 class ProdConfig(Config):
