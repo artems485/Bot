@@ -46,13 +46,13 @@ class Config:
 class DevConfig(Config):
     """Dev config"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = f'mysql:///{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
 
 
 class ProdConfig(Config):
     """Production config"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = f'mysql:///{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
 
 
 config = {
