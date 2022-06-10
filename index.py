@@ -118,6 +118,10 @@ def policy():
     return render_template('policy.html')
 
 
+@app.route('/terms')
+def policy():
+    return render_template('terms.html')
+
 @app.route('/login')
 def login():
     if current_user.is_authenticated:
