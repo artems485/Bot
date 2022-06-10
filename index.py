@@ -1,8 +1,17 @@
+import json
+import os
+
 import telegram
-from flask import Flask, request, Response, redirect, url_for, session
-from flask_oauth import OAuth
+from flask import Flask, request, Response, redirect, url_for, session, url_for, redirect, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_required, login_user, \
+    logout_user, current_user, UserMixin
+from requests_oauthlib import OAuth2Session
+from requests.exceptions import HTTPError
 
 from bot import *
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 webhook = dispatcher.bot.get_webhook_info()
 if webhook.url:
@@ -13,69 +22,140 @@ dispatcher.bot.set_webhook(url='https://bot-blue-alpha.vercel.app/' + TOKEN)
 GOOGLE_CLIENT_ID = '655553482219-gag2tno6u7r7b4rgbjp43vas0qkfo39o.apps.googleusercontent.com'
 GOOGLE_CLIENT_SECRET = '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'
 
-SECRET_KEY = 'asdjaslkdj32kl3j2klj32ljkl2'
-DEBUG = True
+
+class Auth:
+    CLIENT_ID = GOOGLE_CLIENT_ID
+    CLIENT_SECRET = GOOGLE_CLIENT_SECRET
+    REDIRECT_URI = 'https://bot-blue-alpha.vercel.app/authorized'
+    AUTH_URI = 'https://accounts.google.com/o/oauth2/auth'
+    TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
+    USER_INFO = 'https://www.googleapis.com/userinfo/v2/me'
+    SCOPE = ['profile', 'email']
+
+
+SECRET_KEY = os.environ.get("SECRET_KEY") or 'asdjaslkdj32kl3j2klj32ljkl2'
+
+
+class Config:
+    """Base config"""
+    APP_NAME = "Test Google Login"
+    SECRET_KEY = SECRET_KEY
+
+
+class DevConfig(Config):
+    """Dev config"""
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, "test.db")
+
+
+class ProdConfig(Config):
+    """Production config"""
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, "prod.db")
+
+
+config = {
+    'dev': DevConfig,
+    'prod': ProdConfig,
+    'default': DevConfig
+}
 
 app = Flask(__name__)
-app.debug = DEBUG
-app.secret_key = SECRET_KEY
-oauth = OAuth()
+app.config.from_object(config['dev'])
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.session_protection = 'strong'
 
-google = oauth.remote_app('google',
-                          base_url='https://www.google.com/accounts/',
-                          authorize_url='https://accounts.google.com/o/oauth2/auth',
-                          request_token_url=None,
-                          request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
-                                                'response_type': 'code'},
-                          access_token_url='https://accounts.google.com/o/oauth2/token',
-                          access_token_method='POST',
-                          access_token_params={'grant_type': 'authorization_code'},
-                          consumer_key=GOOGLE_CLIENT_ID,
-                          consumer_secret=GOOGLE_CLIENT_SECRET)
+
+class User(db.Model, UserMixin):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=True)
+    tokens = db.Column(db.Text)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+def get_google_auth(state=None, token=None):
+    if token:
+        return OAuth2Session(Auth.CLIENT_ID, token=token)
+    if state:
+        return OAuth2Session(
+            Auth.CLIENT_ID,
+            state=state,
+            redirect_uri=Auth.REDIRECT_URI)
+    oauth = OAuth2Session(
+        Auth.CLIENT_ID,
+        redirect_uri=Auth.REDIRECT_URI,
+        scope=Auth.SCOPE)
+    return oauth
 
 
 @app.route('/')
+@login_required
 def index():
-    access_token = session.get('access_token')
-    if access_token is None:
-        return redirect(url_for('login'))
-
-    access_token = access_token[0]
-    from urllib.request import Request, urlopen
-    from urllib.error import URLError
-
-    headers = {'Authorization': 'OAuth ' + access_token}
-    req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
-                  None, headers)
-    try:
-        res = urlopen(req)
-        return res.read()
-    except URLError as e:
-        # if e.code == 401:
-        #     Unauthorized - bad token
-        # session.pop('access_token', None)
-        # return redirect(url_for('login'))
-        print(e)
-        # return res.read()
+    return render_template('index.html')
 
 
 @app.route('/login')
 def login():
-    callback = url_for('authorized', _external=True)
-    return google.authorize(callback=callback)
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    google = get_google_auth()
+    auth_url, state = google.authorization_url(
+        Auth.AUTH_URI, access_type='offline')
+    session['oauth_state'] = state
+    return render_template('login.html', auth_url=auth_url)
 
 
 @app.route('/authorized')
-@google.authorized_handler
-def authorized(resp):
-    access_token = resp['access_token']
-    session['access_token'] = access_token, ''
+def callback():
+    if current_user is not None and current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if 'error' in request.args:
+        if request.args.get('error') == 'access_denied':
+            return 'You denied access.'
+        return 'Error encountered.'
+    if 'code' not in request.args and 'state' not in request.args:
+        return redirect(url_for('login'))
+    else:
+        google = get_google_auth(state=session['oauth_state'])
+        try:
+            token = google.fetch_token(
+                Auth.TOKEN_URI,
+                client_secret=Auth.CLIENT_SECRET,
+                authorization_response=request.url)
+        except HTTPError:
+            return 'HTTPError occurred.'
+        google = get_google_auth(token=token)
+        resp = google.get(Auth.USER_INFO)
+        if resp.status_code == 200:
+            user_data = resp.json()
+            email = user_data['email']
+            user = User.query.filter_by(email=email).first()
+            if user is None:
+                user = User()
+                user.email = email
+            user.name = user_data['name']
+            print(token)
+            user.tokens = json.dumps(token)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            return redirect(url_for('index'))
+        return 'Could not fetch your information.'
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
     return redirect(url_for('index'))
-
-
-@google.tokengetter
-def get_access_token():
-    return session.get('access_token')
 
 
 @app.route('/' + TOKEN, methods=['POST'])

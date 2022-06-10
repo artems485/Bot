@@ -4,12 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-sqlalchemy = "*"
 python-telegram-bot = "*"
 simplegmail = "*"
 beautifulsoup4 = "*"
 flask = "*"
-flask-oauth = "*"
+requests = "*"
+requests-oauthlib = "*"
+flask-sqlalchemy = "*"
+flask-login = "*"
 
 [dev-packages]
 
