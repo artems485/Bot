@@ -1,7 +1,7 @@
 from enum import IntEnum
 import logging
 
-from app import load_user
+from app import User
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackContext, \
     Dispatcher
@@ -31,7 +31,7 @@ def start(update: Update, context: CallbackContext):
 
 def settings(update: Update, context: CallbackContext):
     context.chat_data['authorization'] = False
-    user = load_user(update.effective_chat.id)
+    user = User.query.get(telegram_id=update.effective_chat.id)
     if not user or not user.is_authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
@@ -53,7 +53,7 @@ def update_email(update: Update, context: CallbackContext):
 
 
 def i_authorized(update: Update, context: CallbackContext):
-    user = load_user(update.effective_chat.id)
+    user = User.query.get(telegram_id=update.effective_chat.id)
     if not user or not user.is_authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Я авторизировался')], [KeyboardButton('Назад')]],
                                  resize_keyboard=True)
@@ -77,7 +77,7 @@ def exit_menu(update: Update, context: CallbackContext):
 
 
 def i_exited(update: Update, context: CallbackContext):
-    user = load_user(update.effective_chat.id)
+    user = User.query.get(telegram_id=update.effective_chat.id)
     if not user or not user.is_authenticated:
         kb = ReplyKeyboardMarkup([[KeyboardButton('Обновить email')], [KeyboardButton('Назад')]], resize_keyboard=True)
         update.message.reply_text('Вы не авторизированы!\nВыберите опцию из списка', reply_markup=kb)
