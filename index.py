@@ -11,7 +11,6 @@ from requests_oauthlib import OAuth2Session
 
 load_dotenv()
 import os
-import MySQLdb
 
 from bot import *
 
