@@ -1,4 +1,5 @@
 import json
+import time
 
 import telegram
 from dotenv import load_dotenv
@@ -15,9 +16,10 @@ import os
 from bot import *
 
 webhook = dispatcher.bot.get_webhook_info()
+time.sleep(1.5)
 if webhook.url:
     dispatcher.bot.delete_webhook()
-
+time.sleep(1.5)
 dispatcher.bot.set_webhook(url='https://bot-blue-alpha.vercel.app/' + TOKEN)
 
 GOOGLE_CLIENT_ID = '762970632572-2ait8506rq0f06vqs4d0vuf57gd8n8le.apps.googleusercontent.com'
