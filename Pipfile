@@ -9,6 +9,7 @@ python-telegram-bot = "*"
 simplegmail = "*"
 beautifulsoup4 = "*"
 flask = "*"
+logtail-python = "*"
 
 [dev-packages]
 

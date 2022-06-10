@@ -1,5 +1,5 @@
-import logging
 from enum import IntEnum
+import logging
 
 from simplegmail import Gmail
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
@@ -9,8 +9,8 @@ from telegram.ext import Updater, ConversationHandler, CommandHandler, MessageHa
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
-
 logger = logging.getLogger(__name__)
+
 TOKEN = '5569549699:AAGRHqOgcprg2iqkkmlV1DzSUaUBbUCwdtM'
 updater = Updater(use_context=True, token=TOKEN)
 dispatcher: Dispatcher = updater.dispatcher
