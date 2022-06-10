@@ -78,7 +78,7 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def base(path):
+def base():
     return 'Hi'
 
 # updater.start_polling()
