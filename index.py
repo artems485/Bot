@@ -46,7 +46,11 @@ class Config:
 class DevConfig(Config):
     """Dev config"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{os.getenv("USERNAME")}:{os.getenv("PASSWORD")}@{os.getenv("HOST")}/{os.getenv("DATABASE")}'
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{os.getenv("PLANETSCALE_DB_USERNAME")}' \
+                              f':{os.getenv("PLANETSCALE_DB_PASSWORD")}' \
+                              f'@{os.getenv("PLANETSCALE_DB_HOST")}' \
+                              f'/{os.getenv("PLANETSCALE_DB")}' \
+                              f'?ssl_ca={os.getenv("PLANETSCALE_SSL_CERT_PATH")}'
 
 
 class ProdConfig(Config):
