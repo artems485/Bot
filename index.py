@@ -53,6 +53,7 @@ class DevConfig(Config):
     SQLALCHEMY_ENGINE_OPTIONS = {
         'connect_args': {
             # 'ssl_mode': 'VERIFY_IDENTITY',
+            # https://stackoverflow.com/questions/60285240/is-there-a-way-to-emulate-ssl-mode-preferred-in-pymysql
             'ssl': {'ca': os.getenv('PLANETSCALE_SSL_CERT_PATH')}
         }
     }
