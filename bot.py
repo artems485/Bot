@@ -24,8 +24,14 @@ class State(IntEnum):
 
 
 def start(update: Update, context: CallbackContext):
-    kb = ReplyKeyboardMarkup([[KeyboardButton('Настройки')]], resize_keyboard=True)
-    update.message.reply_text('Привет', reply_markup=kb)
+    user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
+    if not user or not user.authenticated:
+        kb = ReplyKeyboardMarkup([[KeyboardButton('Настройки')]], resize_keyboard=True)
+        update.message.reply_text('Привет!\nЧтобы продолжить работу, авторизуйтесь через настройки', reply_markup=kb)
+    else:
+        kb = ReplyKeyboardMarkup([[KeyboardButton('Информация о чеках за последние 3 месяца')],\
+            [KeyboardButton('Настройки')]], resize_keyboard=True)
+        update.message.reply_text('Выберите нужную опцию из списка', reply_markup=kb)
     return State.START
 
 
@@ -87,20 +93,32 @@ def i_exited(update: Update, context: CallbackContext):
     return State.EXIT
 
 
+def checks_for_last_3_months(update: Update, context: CallbackContext):
+    kb = ReplyKeyboardMarkup([[KeyboardButton('Информация о чеках за последние 3 месяца')],\
+        [KeyboardButton('Настройки')]], resize_keyboard=True)
+    update.message.reply_text('Пока не работает:((\nВыберите нужную опцию из списка', reply_markup=kb)
+    return State.START
+
+
 conversation = ConversationHandler(name='main',
                                    entry_points=[CommandHandler(command='start', callback=start)],
-                                   states={State.START: [MessageHandler(Filters.text('Настройки'), settings)],
+                                   states={State.START: [
+                                               MessageHandler(Filters.text('Настройки'), settings),
+                                               MessageHandler(Filters.text('Информация о чеках за последние 3 месяца'), \
+                                                checks_for_last_3_months)
+                                            ],
                                            State.SETTINGS: [
                                                MessageHandler(Filters.text('Обновить email'), update_email),
                                                MessageHandler(Filters.text('Назад'), back_to_main_menu),
-                                               MessageHandler(Filters.text('Выйти'), exit_menu)],
+                                               MessageHandler(Filters.text('Выйти'), exit_menu)
+                                            ],
                                            State.EXIT: [
                                                MessageHandler(Filters.text('Назад'), settings),
                                                MessageHandler(Filters.text('Я вышел'), i_exited),
-                                           ],
+                                            ],
                                            State.AUTHORIZATION: [
                                                MessageHandler(Filters.text('Назад'), settings),
                                                MessageHandler(Filters.text('Я авторизировался'), i_authorized)
-                                           ]},
+                                            ]},
                                    fallbacks=[CommandHandler(command='start', callback=start)], per_chat=True)
 dispatcher.add_handler(conversation)
