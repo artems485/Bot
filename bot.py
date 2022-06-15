@@ -72,12 +72,6 @@ def i_authorized(update: Update, context: CallbackContext):
     return settings(update, context)
 
 
-def back_to_main_menu(update: Update, context: CallbackContext):
-    kb = ReplyKeyboardMarkup([[KeyboardButton('Настройки')]], resize_keyboard=True)
-    update.message.reply_text('Привет', reply_markup=kb)
-    return State.START
-
-
 def exit_menu(update: Update, context: CallbackContext):
     kb = ReplyKeyboardMarkup([[KeyboardButton('Я вышел')], [KeyboardButton('Назад')]], resize_keyboard=True)
     update.message.reply_text('Перейдите по ссылке и выйдите https://bot-blue-alpha.vercel.app', reply_markup=kb)
@@ -98,10 +92,10 @@ def i_exited(update: Update, context: CallbackContext):
 def checks_for_last_3_months(update: Update, context: CallbackContext):
     user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
     user_token = json.loads(user.tokens)["access_token"]
-    reply = mail.list_of_checks(user_mail=user.email, user_token=user_token)
+    reply_text = mail.list_of_checks(user_mail=user.email, user_token=user_token)
     kb = ReplyKeyboardMarkup([[KeyboardButton('Информация о чеках за последние 3 месяца')],\
         [KeyboardButton('Настройки')]], resize_keyboard=True)
-    update.message.reply_text(f'Вот, что мне удалось найти:\n{reply}', reply_markup=kb)
+    update.message.reply_text(f'Вот, что мне удалось найти:\n{reply_text}', reply_markup=kb)
     return State.START
 
 
@@ -114,7 +108,7 @@ conversation = ConversationHandler(name='main',
                                             ],
                                            State.SETTINGS: [
                                                MessageHandler(Filters.text('Обновить email'), update_email),
-                                               MessageHandler(Filters.text('Назад'), back_to_main_menu),
+                                               MessageHandler(Filters.text('Назад'), start),
                                                MessageHandler(Filters.text('Выйти'), exit_menu)
                                             ],
                                            State.EXIT: [

@@ -6,7 +6,7 @@ def list_of_checks(user_mail, user_token):
 	check_sendler = 'from:noreply@taxcom.ru'
 	search_params = f'{start_date} {check_sendler}'
 	parameters = dict(access_token = user_token)
-	resp = requests.get(f'https://gmail.googleapis.com/gmail/v1/users/{user_mail}/messages?q={search_params}&access_token={user_token}')
+	resp = requests.get(f'https://gmail.googleapis.com/gmail/v1/users/{user_mail}/messages?access_token={user_token}')
 	return resp.text()
 
 def checks_parser():
