@@ -1,7 +1,13 @@
 from datetime import datetime, timedelta
-google-api-python-client
+import requests
 
+def list_of_checks(user_mail, user_token):
+	start_date = f'after:{(datetime.today()-timedelta(days=92)).strftime("%Y/%m/%d")}'
+	check_sendler = 'from:noreply@taxcom.ru'
+	search_params = f'{start_date} {check_sendler}'
+	parameters = dict(access_token = user_token)
+	resp = requests.get(f'https://gmail.googleapis.com/gmail/v1/users/{user_mail}/messages?q={search_params}&access_token={user_token}')
+	return resp.text()
 
-start_date = f'after:{(datetime.today()-timedelta(days=31)).strftime("%Y/%m/%d")}'
-print(start_date)
-gmail/v1/users/viktorovich2000/messages?q=after%3A2022%2F04%2F14%20from%3Ano-reply%40notify.protonvpn.com&key=AIzaSyAa8yy0GdcGPHdtD083HiGGx_S0vMPScDM
+def checks_parser():
+	pass

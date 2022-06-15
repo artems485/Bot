@@ -1,6 +1,8 @@
 from enum import IntEnum
 import logging
+import json
 
+import mail
 from app import User
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackContext, \
@@ -94,9 +96,12 @@ def i_exited(update: Update, context: CallbackContext):
 
 
 def checks_for_last_3_months(update: Update, context: CallbackContext):
+    user = User.query.filter_by(telegram_id=update.effective_chat.id).first()
+    user_token = json.loads(user.tokens)["access_token"]
+    reply = mail.list_of_checks(user_mail=user.email, user_token=user_token)
     kb = ReplyKeyboardMarkup([[KeyboardButton('Информация о чеках за последние 3 месяца')],\
         [KeyboardButton('Настройки')]], resize_keyboard=True)
-    update.message.reply_text('Пока не работает:((\nВыберите нужную опцию из списка', reply_markup=kb)
+    update.message.reply_text(f'Вот, что мне удалось найти:\n{reply}', reply_markup=kb)
     return State.START
 
 
